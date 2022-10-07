@@ -8,7 +8,7 @@
 ## 项目进展
 TODO
 ## 项目介绍
-Sibyl is a Easier-to-use SQL Diagnostics tool for TiDB. 小白也能用的 SQL 优化工具。
+Sibyl is an Easier-to-use SQL Diagnostics tool for TiDB. 小白也能用的 SQL 优化工具。
 ## 背景 & 动机
 TiDB 作为一个分布式数据库管理系统，有着比单机数据库更复杂的 SQL 诊断难度。用户需要
 
