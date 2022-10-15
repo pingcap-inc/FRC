@@ -23,7 +23,7 @@ TiDB 作为一个分布式数据库管理系统，有着比单机数据库更复
 
 需要深刻理解 TiDB 的执行计划（[TiDB 执行计划概览](https://docs.pingcap.com/zh/tidb/v6.3/explain-overview)），才能发现慢查询的问题，如：SQL 写的不对导致算子不合适，未能将执行计划成功下推到存储节点；哪些范围查询算子不能使用索引；哪些算子相关的系统变量设置有问题；等等。
 
-[SQL Plan](/Image/SQL Plan.png)
+![SQL Plan](/Image/SQL Plan.png)
 
 需要熟悉 TiDB 的基本架构逻辑，理解不同组件耗时指标的正常阈值。当超出阈值时，需要用户清楚如何操作才能对异常值进行优化。
 
