@@ -107,12 +107,14 @@ Create index idx_003 on orders (O_ORDERPRIORITY, O_ORDERSTATUS, O_SHIPPRIORITY)
 如下列子：
 
 Select * from orders where O_ORDERSTATUS ='F' and  O_ORDERPRIORITY='5-LOW' and O_Clerk='Clerk#000006445';
-[Case5-1]
+
+![Case5-1](https://github.com/Sibyl-TiDB/FRC/blob/main/Image/Case5-1.png)
 
 通过查询发现O_Clerk的distinc值有大概59000个，所以建议加下列索引：
 
 Create table idx_004 on orders(O_Clerk,O_ORDERPRIORITY, O_ORDERSTATUS)
-[Case5-2]
+
+![Case5-2](https://github.com/Sibyl-TiDB/FRC/blob/main/Image/Case5-2.png)
 
 性能提升两倍。
 
