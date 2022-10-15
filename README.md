@@ -66,8 +66,10 @@ Select * from orders where O_ORDERSTATUS ='F' and  O_ORDERPRIORITY='5-LOW' and O
 Create table idx_004 on orders(O_Clerk,O_ORDERPRIORITY, O_ORDERSTATUS)
 [Case5-2]
 提升两倍。
+
 #### Case 6. 统计信息过时
 TODO
+
 #### 索引字段的选择性计算逻辑
 - 通过 “show table status like” 获得表的总行数 table_count。
 - 通过计算选择表中已存在的区分度最高的索引 best_index，同时Primary key > Unique key > 一般索引。
@@ -76,19 +78,29 @@ TODO
   - rand_rows =(table_count / 2) > 1W ? 1W : (table_count / 2)
 - 使用select count(1) from (select field from table force index(best_index) order by cl.. desc limit rand_rows) where field_print 得到满足条件的rows。
   - cardinality = rows == 0 ? rand_rows : rand_rows / rows;
+
 ## 缺点
+
 ### Automatic Running
 自动化控制集群的功能，虽然可以在 Hackathon 中进行尝试，但是在真实业务集群中，系统跳过集群管理员直接操作集群的行为，还有一段时间要走。因为数据库集群的稳定对上层业务非常重要，所以在真实业务集群中会考虑提供建议操作，让用户来执行。
+
 ### Advisor Model 的反馈、评价和优化
 虽然有很多专家经验可以参考，建立相对合理的建议模型。但是，依然不能排除有非常特殊的 Workload，让模型给出无效的优化操作。因此，后续需要建立对所有 Advisor 的反馈、评价和优化机制。
+
 在后续的产品化工作中，需要了解每个 Advisor 被生成、被应用的次数，以及每一次应用后的优化效果，并且根据不同 workload 中的优化效果，来尝试对模型进行后续的优化。
+
 ## FAQ
 TODO
+
 ## 效果验证
+
 ### 环境
-TiDB v6.3
-AWS EC2
+TiDB v6.3;
+
+AWS EC2;
+
 ### Workload
 TBD
+
 ### 结果
 TODO
