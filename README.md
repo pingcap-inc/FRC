@@ -17,61 +17,95 @@ Sibyl is an Easier-to-use SQL Diagnostics tool for TiDB.
 
 小白也能用的 SQL 优化工具。
 ## 背景 & 动机
-TiDB 作为一个分布式数据库管理系统，有着比单机数据库更复杂的 SQL 诊断难度。为了诊断一个慢查询，
-- 需要理解不同 workload 适合什么样的存储类型（列存还是行存）？
-- 需要深刻理解 TiDB 的执行计划（[TiDB 执行计划概览](https://docs.pingcap.com/zh/tidb/v6.3/explain-overview)），才能发现慢查询的问题，如：SQL 写的不对导致算子不合适，未能将执行计划成功下推到存储节点；哪些范围查询算子不能使用索引；哪些算子相关的系统变量设置有问题；等等。
+TiDB 作为一个分布式数据库管理系统，有着比单机数据库更复杂的 SQL 诊断难度。为了诊断一个慢查询，需要
+
+需要理解不同 workload 适合什么样的存储类型（列存还是行存）？
+
+需要深刻理解 TiDB 的执行计划（[TiDB 执行计划概览](https://docs.pingcap.com/zh/tidb/v6.3/explain-overview)），才能发现慢查询的问题，如：SQL 写的不对导致算子不合适，未能将执行计划成功下推到存储节点；哪些范围查询算子不能使用索引；哪些算子相关的系统变量设置有问题；等等。
+
 [SQL Plan]()
-- 需要熟悉 TiDB 的基本架构逻辑，理解不同组件耗时指标的正常阈值。当超出阈值时，需要用户清楚如何操作才能对异常值进行优化。
+
+需要熟悉 TiDB 的基本架构逻辑，理解不同组件耗时指标的正常阈值。当超出阈值时，需要用户清楚如何操作才能对异常值进行优化。
+
 [SQL Exe Time]
+
 [SQL Cop Time]
-- 需要发现整体性能和单个 SQL 之间的关系。慢 SQL 数量的整体提升，可能是因为磁盘的抖动，或者单个 TiDB 的资源达到瓶颈？
+
+需要发现整体性能和单个 SQL 之间的关系。慢 SQL 数量的整体提升，可能是因为磁盘的抖动，或者单个 TiDB 的资源达到瓶颈？
+
 [TiKV iops]
+
 因此，虽然 TiDB 有丰富的文档介绍，包括 SQL 诊断的文档介绍，但是在 TiDB 的技术支持中，依然有客户寻求更多的慢查询的优化方案。
+
 基于以上背景，为了让用户能够更顺利地使用 TiDB，需要能够将更多的 TIDB 支持的专家能力自动化的转化为产品对用户的建议，让用户能够自主了解问题，采用建议，独立完成慢查询的优化过程。
+
 ## 项目设计
+
 ### 整体思路
 我们尝试优化 TiDB 的 Slow SQL 查询性能，提供多种的优化建议，包括不限于索引优化，表结构优化，配置和参数优化，拓扑优化等等。
+
 [SQL Advisor Frame]
+
 ### Advisor Model Case
 [Model Case Summary]
+
 ####  Case 1. 确少索引 和统计信息缺失
 [Case1-1]
+
 Model 输出：
 1. Create index  idx_001 on orders(O_TOTALPRICE)
 2. 建议用户执行analyse table orders， 收集统计信息。
 [Case1-2]
+
 #### Case 2: 有索引但是不走
 [Case2-1]
 [Case2-2]
 输出： 解释原因 为什么不走，因为该条语句的结果集太大了，超过了80%。
+
 #### Case 3. 如何判读一个语句是否是最优
+
 [Case3-1]
+
 如果返回结果集远远小于扫描行数 则需要优化。主要是索引建议
+
 explain analyze select count(*) from orders where O_TOTALPRICE>3000 and O_CLERK='Tom' and O_ORDERDATE>'2022-09-30';
+
 #### Case 4. 复合字段索引建议
 Select * from orders where O_ORDERSTATUS ='F' and  O_ORDERPRIORITY='5-LOW' and O_SHIPPRIORITY!=0
+
 [Case4-1]
+
 分别计算各列的distinct值：
+
 [Case4-2]
 [Case4-3]
 [Case4-4]
+
 建复合索引的后台逻辑：
+
 按照where条件中distinct值由到底的顺序：
 1. O_ORDERPRIORITY，
 2. O_ORDERSTATUS
 3. O_SHIPPRIORITY
+
 Create index idx_003 on orders (O_ORDERPRIORITY, O_ORDERSTATUS, O_SHIPPRIORITY)
 [Case4-5]
 [Case4-6]
+
 时间提升计算逻辑： 以前实际扫描行数/加索引后扫描行数。这个这是一个近似值。但上面这个例子中如果按照这个算法可以提升80倍。但是实践提升只有5倍。之所以有这么大的差距主要是TiDB是分布式数据。和MySQL那种单体数据库内部执行逻辑不一样。
+
 #### Case 5. 多字段查询，只有部分字段命中索引
 如下列子：
+
 Select * from orders where O_ORDERSTATUS ='F' and  O_ORDERPRIORITY='5-LOW' and O_Clerk='Clerk#000006445';
 [Case5-1]
+
 通过查询发现O_Clerk的distinc值有大概59000个，所以建议加下列索引：
+
 Create table idx_004 on orders(O_Clerk,O_ORDERPRIORITY, O_ORDERSTATUS)
 [Case5-2]
-提升两倍。
+
+性能提升两倍。
 
 #### Case 6. 统计信息过时
 TODO
