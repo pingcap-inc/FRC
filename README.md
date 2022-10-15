@@ -1,15 +1,21 @@
 # Sibyl
+
 # 基本介绍
+
 ## 团队名称：鸡你太美
 - [lilyjazz](https://github.com/lilyjazz): TiDB 产品经理
 - [Hawkson-jee](https://github.com/Hawkson-jee): TiDB 后端研发
 - [lucklove](https://github.com/lucklove): TiDB 后端研发
 - [shhdgit](https://github.com/shhdgit): TiDB 前端研发
+
 ## 项目进展
 - 慢 SQL 和相关信息展示 DEMO 制作（ing）
 - SQL Advisor DEMO 制作（ing）
+
 ## 项目介绍
-Sibyl is an Easier-to-use SQL Diagnostics tool for TiDB. 小白也能用的 SQL 优化工具。
+Sibyl is an Easier-to-use SQL Diagnostics tool for TiDB. 
+
+小白也能用的 SQL 优化工具。
 ## 背景 & 动机
 TiDB 作为一个分布式数据库管理系统，有着比单机数据库更复杂的 SQL 诊断难度。为了诊断一个慢查询，
 - 需要理解不同 workload 适合什么样的存储类型（列存还是行存）？
@@ -71,13 +77,16 @@ Create table idx_004 on orders(O_Clerk,O_ORDERPRIORITY, O_ORDERSTATUS)
 TODO
 
 #### 索引字段的选择性计算逻辑
-- 通过 “show table status like” 获得表的总行数 table_count。
-- 通过计算选择表中已存在的区分度最高的索引 best_index，同时Primary key > Unique key > 一般索引。
-- 通过计算获取数据采样的起始值offset与采样范围rand_rows：
-  - offset = (table_count / 2) > 10W ? 10W : (table_count / 2)
-  - rand_rows =(table_count / 2) > 1W ? 1W : (table_count / 2)
-- 使用select count(1) from (select field from table force index(best_index) order by cl.. desc limit rand_rows) where field_print 得到满足条件的rows。
-  - cardinality = rows == 0 ? rand_rows : rand_rows / rows;
+通过 “show table status like” 获得表的总行数 table_count。
+
+通过计算选择表中已存在的区分度最高的索引 best_index，同时Primary key > Unique key > 一般索引。
+
+通过计算获取数据采样的起始值offset与采样范围rand_rows：
+- offset = (table_count / 2) > 10W ? 10W : (table_count / 2)
+- rand_rows =(table_count / 2) > 1W ? 1W : (table_count / 2)
+
+使用select count(1) from (select field from table force index(best_index) order by cl.. desc limit rand_rows) where field_print 得到满足条件的rows。
+- cardinality = rows == 0 ? rand_rows : rand_rows / rows;
 
 ## 缺点
 
